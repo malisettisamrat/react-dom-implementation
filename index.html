@@ -7,16 +7,44 @@
     let todoState = [];
     let oldTodoState = [];
 
-    function addTodoToDom() {
+    function markAsDone(id) {
+      const parent = document.getElementById(id);
+      parent.children[2].innerHTML = "Done";
+    }
+
+    function addTodoToDom(todo) {
+      // create a child element referred as parent div for todos..
+      const child = document.createElement("div");
+
+      const firstGrandChild = document.createElement("div");
+      firstGrandChild.innerHTML = todo.title;
       
+      const secondGrandChild = document.createElement("div");
+      secondGrandChild.innerHTML = todo.description;
+      
+      const thirdGrandChild = document.createElement("button");
+      thirdGrandChild.innerHTML = "Mark As Done";
+      thirdGrandChild.setAttribute("onclick", `markAsDone(${id})`);
+      
+      // append children to the child element...
+      child.appendChild(firstGrandChild);
+      child.appendChild(secondGrandChild);
+      child.appendChild(thirdGrandChild);
+
+      child.setAttribute("id", id);
+      return child;
     }
 
     function removeTodoFromDom(todo) {
-      
+      const element = document.getElementById(todo.id);
+      element.parent.removeChild(element);
     }
 
     function updateTodoInDom(oldTodo, newTodo) {
-        
+      const element = document.getElementById(oldTodo.id);
+      element.children[0].innerHTML = newTodo.title;
+      element.children[1].innerHTML = newTodo.description;
+      element.children[2].innerHTML = newTodo.completed ? "Done" : "Mark as Done";
     }
 
     function updateState(newTodos) {
@@ -32,29 +60,6 @@
       // call addTodo, removeTodo, updateTodo functions on each of the
       // elements
       oldTodoState = newTodos;
-    }
-
-    function markAsDone(id) {
-      console.log(id, 'Mas as done functiuon');
-      const parent = document.getElementById(id);
-      parent.children[2].innerHTML = "Done!";
-    }
-
-    function createChild(title, description, id) {
-      const child = document.createElement("div");
-      const firstGrandChild = document.createElement("div");
-      firstGrandChild.innerHTML = title;
-      const secondGrandChild = document.createElement("div");
-      secondGrandChild.innerHTML = description;
-      const thirdGrandChild = document.createElement("button");
-      thirdGrandChild.innerHTML = "Mark As Done";
-      thirdGrandChild.setAttribute("onclick", `markAsDone(${id})`);
-      child.appendChild(firstGrandChild);
-      child.appendChild(secondGrandChild);
-      child.appendChild(thirdGrandChild);
-      child.setAttribute("id", id);
-
-      return child;
     }
 
     // Dynamic rendering the state to the DOM from API
@@ -77,10 +82,6 @@
     function addTodo() {
       const title = document.getElementById("title").value;
       const description = document.getElementById("description").value;
-
-      const parent = document.getElementById("todos");
-      parent.appendChild(createChild(title, description, globalId));
-      globalId = globalId + 1;
 
       todoState.push({
         title: title,
