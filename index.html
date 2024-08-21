@@ -24,15 +24,17 @@
       
       const thirdGrandChild = document.createElement("button");
       thirdGrandChild.innerHTML = "Mark As Done";
-      thirdGrandChild.setAttribute("onclick", `markAsDone(${id})`);
+      thirdGrandChild.setAttribute("onclick", `markAsDone(${todo.id})`);
       
       // append children to the child element...
       child.appendChild(firstGrandChild);
       child.appendChild(secondGrandChild);
       child.appendChild(thirdGrandChild);
 
-      child.setAttribute("id", id);
-      return child;
+      child.setAttribute("id", todo.id);
+      
+      const parent = document.getElementById("todos");
+      parent.appendChild(child);
     }
 
     function removeTodoFromDom(todo) {
@@ -53,39 +55,44 @@
       // 1. added
       // 2. deleted
       // 3. updated
-      const added = [];
-      const deleted = [];
-      const updated = [];
+      let added = [];
+      let deleted = [];
+      let updated = [];
       // calculate these 3 arrays
       // call addTodo, removeTodo, updateTodo functions on each of the
       // elements
-      oldTodoState = newTodos;
-    }
 
-    // Dynamic rendering the state to the DOM from API
-    function updateTodoToState(state) {
-      const parent = document.getElementById("todos");
-      parent.innerHTML = "";
-      for(let i = 0; i < state.length; ++i) {
-        const child = createChild(state[i].title, state[i].description, state[i].id);
-        parent.appendChild(child);
-      }
-    }
+      console.log(newTodos, 'New Todos');
+      console.log(oldTodoState, 'Old todo state');
 
-    // Calling the API that generates the random todos every 5 seconds
-    window.setInterval(async function() {
-      const res = await fetch("https://sum-server.100xdevs.com/todos");
-      const data = await res.json();
-      updateTodoToState(data.todos);
-    }, 5000);
+      // adding the todos by comparing the newTodo state with oldTodo state...
+      added = newTodos.filter(newTodo => !oldTodoState.some(todo => todo.id === newTodo.id));
+
+      // deleting the todos by comparing the oldTodo state with newTodo state...
+      deleted = oldTodoState.filter(oldTodo => !newTodos.some(todo => todo.id === oldTodo.id));
+
+      // updating the todo state
+      updated = newTodos.filter(newTodo => oldTodoState.filter(todo => ((todo.id === newTodo.id) && (todo.title !== newTodo.title) && (todo.title !== newTodo.description))));
+
+      added?.map(todo => addTodoToDom(todo));
+
+      deleted?.map(todo => removeTodoFromDom(todo));
+
+      updated?.map(newTodo => {
+        const oldTodo = oldTodoState.find(oldTodo => oldTodo.id === newTodo.id);
+        updateTodoInDom(oldTodo, newTodo);
+      })
+
+      oldTodoState = [...newTodos];
+    }
 
     function addTodo() {
       const title = document.getElementById("title").value;
       const description = document.getElementById("description").value;
-
       todoState.push({
         title: title,
         description: description,
+        completed: false,
         id: globalId++,
       })
       updateState(todoState);
